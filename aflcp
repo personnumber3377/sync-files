@@ -1,0 +1,78 @@
+#!/bin/python3
+
+import sys
+import os
+
+
+
+
+
+
+
+help_msg = '''This tool is supposed to be a tool to copy files to an afl directory from another directory. Basically this tool just copies the files and adds the id:xxxxxx thing before the filename because some other programs require this in order for the program to work properly (aka afl-cov)'''
+
+def print_usage():
+	print(help_msg)
+
+	print("Usage: "+str(sys.argv[0]) + " LIST_OF_FILES --queue-dir AFL_QUEUE_DIR")
+	exit(1)
+
+
+def get_max_id(directory):
+
+	files = os.listdir(directory)
+	
+	max_id = 0
+	
+	for file in files:
+
+		if "id:" in file:
+			print("file == "+str(file))
+			integer_thing = file[3:]
+			if integer_thing == "":
+				continue
+			else:
+				print("integer_thing == "+str(integer_thing))
+				print("integer_thing[:6] == "+str(integer_thing[:6]))
+				integer_thing = integer_thing[:6]
+
+				integer_thing = int(integer_thing)
+				if integer_thing > max_id:
+					max_id = integer_thing
+
+	return max_id
+
+
+
+if __name__=="__main__":
+
+	if len(sys.argv) == 1 or "--help" in sys.argv or "--queue-dir" not in sys.argv:
+		print_usage()
+		exit(1)
+
+	files_to_be_copied = sys.argv
+	files_to_be_copied = files_to_be_copied[1:]
+	queue_dir_ind = files_to_be_copied.index("--queue-dir")
+	queue_dir = files_to_be_copied[queue_dir_ind+1]
+	# this has to be done twice because we also want to get rid of the --queue-dir argument and the thing after it 
+	if queue_dir[-1] != "/":
+		queue_dir += "/"
+	files_to_be_copied.pop(queue_dir_ind)
+	files_to_be_copied.pop(queue_dir_ind)
+
+	files_to_be_copied = list(set(files_to_be_copied)) # get rid of duplicates. This actually does not remove all duplicates because a user can can do something like ../curdir/thing and ./thing when inside curdir but this is good enough.
+
+
+	#print("queue_dir == "+str(queue_dir))
+	cur_id = get_max_id(queue_dir)
+	cur_id+= 1
+	print(cur_id)
+	for file in files_to_be_copied:
+		#print(file)
+		cur_filename = "id:"+"0"*(6-len(str(cur_id)))+str(cur_id)+",whatever"
+		os.system("cp "+str(file)+" "+str(queue_dir)+cur_filename)
+	print("[+] Done")
+
+
+
+
