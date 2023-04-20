@@ -27,13 +27,13 @@ def get_max_id(directory):
 	for file in files:
 
 		if "id:" in file:
-			print("file == "+str(file))
+			#print("file == "+str(file))
 			integer_thing = file[3:]
 			if integer_thing == "":
 				continue
 			else:
-				print("integer_thing == "+str(integer_thing))
-				print("integer_thing[:6] == "+str(integer_thing[:6]))
+				#print("integer_thing == "+str(integer_thing))
+				#print("integer_thing[:6] == "+str(integer_thing[:6]))
 				integer_thing = integer_thing[:6]
 
 				integer_thing = int(integer_thing)
@@ -50,6 +50,9 @@ if __name__=="__main__":
 		print_usage()
 		exit(1)
 
+	extension = ""
+
+
 	files_to_be_copied = sys.argv
 	files_to_be_copied = files_to_be_copied[1:]
 	queue_dir_ind = files_to_be_copied.index("--queue-dir")
@@ -60,6 +63,14 @@ if __name__=="__main__":
 	files_to_be_copied.pop(queue_dir_ind)
 	files_to_be_copied.pop(queue_dir_ind)
 
+	if "--extension" in files_to_be_copied:
+
+		ext_ind = files_to_be_copied.index("--extension")
+		extension = files_to_be_copied[ext_ind+1]
+		files_to_be_copied.pop(ext_ind)
+		files_to_be_copied.pop(ext_ind)
+
+
 	files_to_be_copied = list(set(files_to_be_copied)) # get rid of duplicates. This actually does not remove all duplicates because a user can can do something like ../curdir/thing and ./thing when inside curdir but this is good enough.
 
 
@@ -69,8 +80,10 @@ if __name__=="__main__":
 	print(cur_id)
 	for file in files_to_be_copied:
 		#print(file)
-		cur_filename = "id:"+"0"*(6-len(str(cur_id)))+str(cur_id)+",whatever"
+		cur_filename = "id:"+"0"*(6-len(str(cur_id)))+str(cur_id)+",whatever"+extension
 		os.system("cp "+str(file)+" "+str(queue_dir)+cur_filename)
+		cur_id += 1
+
 	print("[+] Done")
 
 
